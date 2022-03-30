@@ -1,4 +1,6 @@
 import pandas as pd
+from sklearn import linear_model
+
 
 def sap_counter_data_cleanup():
   """обработка таблицы с данными о наработке из сап"""
@@ -56,4 +58,23 @@ def sap_counter_data_cleanup():
   
 # sap_counter_data_cleanup()
 
+def ml_model():
+  data_df = pd.read_csv("data/motohours_data_eo.csv")
+  # print(data_df.info())
+  # print(len(data_df))
+  # на графике получившихся точек видны выбросы. убираем их
+  data_df = data_df.loc[data_df['motohours_measure_ts'] > 50000000]
+  # print(len(data_df))
+  data_df = data_df.loc[:, ['motohours_measure_ts', 'motohours']]
+  data_df.sort_values(['motohours_measure_ts'], inplace = True)
 
+  model = linear_model.LinearRegression()
+  model.fit(data_df[['motohours_measure_ts']].values, data_df.motohours)
+
+  prediction = model.predict([[1641427200], [1668124800]])
+  print(prediction)
+  print("model.coef: ", model.coef_)
+  print("model.intercept: ", model.intercept_)
+  
+  
+ml_model()
